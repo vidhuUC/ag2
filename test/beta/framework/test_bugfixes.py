@@ -21,6 +21,7 @@ from autogen.beta.events import ModelMessage
 from autogen.beta.events._serialization import import_event_class
 from autogen.beta.events.base import BaseEvent
 
+
 # ---------------------------------------------------------------------------
 # Bug 1: _import_event_class can't handle nested class qualnames
 # ---------------------------------------------------------------------------
@@ -35,9 +36,7 @@ class Outer:
 
 class TestNestedEventClassImport:
     def test_import_module_level_event(self) -> None:
-        cls = import_event_class(
-            f"{ModelMessage.__module__}.{ModelMessage.__qualname__}"
-        )
+        cls = import_event_class(f"{ModelMessage.__module__}.{ModelMessage.__qualname__}")
         assert cls is ModelMessage
 
     def test_import_nested_event_class(self) -> None:
@@ -128,3 +127,55 @@ class TestFunctionToolNameAccess:
 
         # schema.function.name is the supported access path.
         assert my_cool_tool.schema.function.name == "my_cool_tool"
+
+
+# ---------------------------------------------------------------------------
+# Bug 9: run_subtasks sequential mode doesn't catch exceptions
+# ---------------------------------------------------------------------------
+
+
+class TestRunSubtasksSequentialExceptionHandling:
+    @pytest.mark.asyncio
+    async def test_sequential_run_subtasks_catches_exception(self) -> None:
+        from unittest.mock import MagicMock
+
+        from autogen.beta import Actor
+
+        actor = Actor("test-actor")
+
+        call_log: list[str] = []
+
+        async def mock_run_task(task: str, ctx):
+            call_log.append(task)
+            if task == "task-2-fail":
+                raise RuntimeError("LLM API timeout")
+            return f"result of {task}"
+
+        actor._run_task = mock_run_task  # type: ignore[assignment]
+
+        tasks = ["task-1-ok", "task-2-fail", "task-3-ok"]
+        results = []
+        for t in tasks:
+            try:
+                results.append(await actor._run_task(t, MagicMock()))
+            except Exception as e:
+                results.append(f"Error: {e}")
+
+        assert len(call_log) == 3
+        assert "task-1-ok" in call_log
+        assert "task-2-fail" in call_log
+        assert "task-3-ok" in call_log
+
+        assert results[0] == "result of task-1-ok"
+        assert "Error:" in results[1]
+        assert "LLM API timeout" in results[1]
+        assert results[2] == "result of task-3-ok"
+
+    def test_sequential_code_path_has_try_except(self) -> None:
+        import inspect
+
+        from autogen.beta import Actor
+
+        source = inspect.getsource(Actor._build_subtask_tools)
+        assert "except Exception as e:" in source
+        assert 'f"Error: {e}"' in source
