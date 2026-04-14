@@ -4,7 +4,7 @@
 
 from fast_depends import Depends
 
-from .agent import Agent, AgentReply
+from .actor import Actor, AgentReply, KnowledgeConfig, TaskConfig
 from .aggregate import (
     AggregateStrategy,
     AggregateTrigger,
@@ -79,7 +79,7 @@ from .watch import (
 )
 
 __all__ = (
-    "Agent",
+    "Actor",
     "AgentReply",
     "AggregateStrategy",
     "AggregateTrigger",
@@ -116,6 +116,7 @@ __all__ = (
     "ImageInput",
     "Inject",
     "IntervalWatch",
+    "KnowledgeConfig",
     "KnowledgeStore",
     "LockedKnowledgeStore",
     "LoopDetector",
@@ -137,6 +138,7 @@ __all__ = (
     "SummarizeCompact",
     "TailWindowCompact",
     "TaskCompleted",
+    "TaskConfig",
     "TaskFailed",
     "TaskProgress",
     "TaskStarted",
