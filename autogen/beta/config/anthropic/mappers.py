@@ -11,13 +11,13 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 from autogen.beta.events import BaseEvent, ModelRequest, ModelResponse, TextInput, ToolResultsEvent
-from autogen.beta.events.tool_events import ToolErrorEvent, ToolResultEvent
 from autogen.beta.events.input_events import (
     BinaryInput,
     BinaryType,
     FileIdInput,
     UrlInput,
 )
+from autogen.beta.events.tool_events import ToolErrorEvent, ToolResultEvent
 from autogen.beta.events.types import Usage
 from autogen.beta.exceptions import UnsupportedInputError, UnsupportedToolError
 from autogen.beta.response import ResponseProto
@@ -308,19 +308,17 @@ def convert_messages(
             # `resolved_tool_ids` above). Emit as its own user turn so
             # the conversation stays consistent.
             parent = getattr(message, "parent_id", None)
-            if (
-                parent
-                and parent in valid_tool_ids
-                and parent not in emitted_result_ids
-            ):
+            if parent and parent in valid_tool_ids and parent not in emitted_result_ids:
                 emitted_result_ids.add(parent)
                 result.append({
                     "role": "user",
-                    "content": [{
-                        "type": "tool_result",
-                        "tool_use_id": parent,
-                        "content": message.content,
-                    }],
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": parent,
+                            "content": message.content,
+                        }
+                    ],
                 })
 
         elif isinstance(message, ModelRequest):

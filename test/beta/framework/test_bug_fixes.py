@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Sequence
-from contextlib import ExitStack
 from typing import Any
 
 import pytest
@@ -43,7 +42,6 @@ from autogen.beta.actor import (
     _get_stream_turn_lock,
 )
 from autogen.beta.aggregate import AggregateTrigger
-from autogen.beta.annotations import Context
 from autogen.beta.config import LLMClient, ModelConfig
 from autogen.beta.context import ConversationContext as ContextType
 from autogen.beta.events import (
@@ -58,7 +56,6 @@ from autogen.beta.events import (
     ToolCallsEvent,
 )
 from autogen.beta.events.alert import HaltEvent, ObserverAlert, Severity
-from autogen.beta.events.conditions import TypeCondition
 from autogen.beta.events.lifecycle import (
     AggregationCompleted,
     ObserverCompleted,
@@ -68,7 +65,6 @@ from autogen.beta.knowledge import MemoryKnowledgeStore, StoreBootstrap
 from autogen.beta.policies import AlertPolicy
 from autogen.beta.stream import MemoryStream
 from autogen.beta.watch import EventWatch
-
 
 # ---------------------------------------------------------------------------
 # Shared fakes

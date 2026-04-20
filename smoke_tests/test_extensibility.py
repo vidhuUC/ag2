@@ -9,23 +9,16 @@ Real LLM calls via Gemini 3 Flash Preview.
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 from autogen.beta import Actor, Context
 from autogen.beta.events import (
-    BaseEvent,
     HumanInputRequest,
     HumanMessage,
-    ModelRequest,
-    ModelResponse,
 )
 from autogen.beta.middleware import BaseMiddleware
 from autogen.beta.middleware.builtin import LoggingMiddleware
 from autogen.beta.plugin import Plugin
-from autogen.beta.stream import MemoryStream
-
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.gemini]
 

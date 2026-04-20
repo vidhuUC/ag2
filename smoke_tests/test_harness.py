@@ -10,7 +10,6 @@ Uses Gemini 3 Flash Preview as the default driver (fast, cheap, capable).
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 
 import pytest
@@ -37,13 +36,10 @@ from autogen.beta.knowledge import (
 )
 from autogen.beta.policies import (
     ConversationPolicy,
-    EpisodicMemoryPolicy,
     SlidingWindowPolicy,
     TokenBudgetPolicy,
-    WorkingMemoryPolicy,
 )
 from autogen.beta.stream import MemoryStream
-
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.gemini]
 
@@ -191,8 +187,7 @@ async def test_knowledge_tool_via_actor(gemini_flash_config) -> None:
     )
 
     r1 = await agent.ask(
-        "Please remember that my favourite animal is a red panda. "
-        "Store this at /preferences/animal.md"
+        "Please remember that my favourite animal is a red panda. Store this at /preferences/animal.md"
     )
     assert r1.body is not None
 
@@ -202,9 +197,7 @@ async def test_knowledge_tool_via_actor(gemini_flash_config) -> None:
     assert "red panda" in content.lower()
 
     # Ask the agent to recall via the tool
-    r2 = await agent.ask(
-        "What is my favourite animal? Look it up in /preferences/animal.md and tell me."
-    )
+    r2 = await agent.ask("What is my favourite animal? Look it up in /preferences/animal.md and tell me.")
     assert r2.body is not None
     assert "red panda" in r2.body.lower()
 
@@ -356,9 +349,9 @@ async def test_every_n_turns_aggregation(gemini_flash_config) -> None:
     )
 
     r = await agent.ask("Say 'a'.", stream=stream)  # turn 1
-    r = await r.ask("Say 'b'.")                      # turn 2 → fire
-    r = await r.ask("Say 'c'.")                      # turn 3
-    r = await r.ask("Say 'd'.")                      # turn 4 → fire
+    r = await r.ask("Say 'b'.")  # turn 2 → fire
+    r = await r.ask("Say 'c'.")  # turn 3
+    r = await r.ask("Say 'd'.")  # turn 4 → fire
 
     assert len(aggregate_events) == 2
     for evt in aggregate_events:
@@ -395,8 +388,8 @@ async def test_every_n_events_aggregation(gemini_flash_config) -> None:
     )
 
     r = await agent.ask("Say 'w'.", stream=stream)  # 0→2, no crossing
-    r = await r.ask("Say 'x'.")                      # 2→4, crosses 3 → fire
-    r = await r.ask("Say 'y'.")                      # 4→6, crosses 6 → fire
-    r = await r.ask("Say 'z'.")                      # 6→8, no crossing
+    r = await r.ask("Say 'x'.")  # 2→4, crosses 3 → fire
+    r = await r.ask("Say 'y'.")  # 4→6, crosses 6 → fire
+    r = await r.ask("Say 'z'.")  # 6→8, no crossing
 
     assert len(aggregate_events) == 2

@@ -21,7 +21,6 @@ from autogen.beta.events import ModelMessage
 from autogen.beta.events._serialization import import_event_class
 from autogen.beta.events.base import BaseEvent
 
-
 # ---------------------------------------------------------------------------
 # Bug 1: _import_event_class can't handle nested class qualnames
 # ---------------------------------------------------------------------------

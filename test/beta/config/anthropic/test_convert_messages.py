@@ -558,10 +558,12 @@ class TestIndividualToolResultFallback:
             }),
             IsPartialDict({
                 "role": "user",
-                "content": [IsPartialDict({
-                    "type": "tool_result",
-                    "tool_use_id": "tc_1",
-                })],
+                "content": [
+                    IsPartialDict({
+                        "type": "tool_result",
+                        "tool_use_id": "tc_1",
+                    })
+                ],
             }),
         ]
         # ToolResult wraps content as JSON — assert the value is present.
@@ -582,10 +584,12 @@ class TestIndividualToolResultFallback:
             IsPartialDict({"role": "assistant"}),
             IsPartialDict({
                 "role": "user",
-                "content": [IsPartialDict({
-                    "type": "tool_result",
-                    "tool_use_id": "tc_1",
-                })],
+                "content": [
+                    IsPartialDict({
+                        "type": "tool_result",
+                        "tool_use_id": "tc_1",
+                    })
+                ],
             }),
         ]
 

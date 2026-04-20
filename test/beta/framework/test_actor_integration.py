@@ -247,9 +247,7 @@ class TestCompactionMiddleware:
         # Second turn — no new events, should not compact again
         await mw.on_turn(call_next, initial_event, ctx)
         remaining2 = list(await stream.history.get_events())
-        non_lifecycle2 = [
-            e for e in remaining2 if not isinstance(e, CompactionCompleted)
-        ]
+        non_lifecycle2 = [e for e in remaining2 if not isinstance(e, CompactionCompleted)]
         assert len(non_lifecycle2) == len(non_lifecycle)
 
 

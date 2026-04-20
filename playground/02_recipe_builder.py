@@ -14,11 +14,10 @@ from __future__ import annotations
 
 import asyncio
 
+from _config import default_config, section
 from pydantic import BaseModel, Field
 
 from autogen.beta import Actor
-
-from _config import default_config, section
 
 
 class Ingredient(BaseModel):
