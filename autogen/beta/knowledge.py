@@ -33,6 +33,19 @@ if TYPE_CHECKING:
     from autogen.beta.events import BaseEvent
 
 
+# Conventional paths — producer/consumer contracts between aggregation
+# strategies, assembly policies, and the event-log writer. Change one,
+# change the matching consumer.
+WORKING_MEMORY_PATH = "/memory/working.md"
+"""Actor's persistent state. Produced by WorkingMemoryAggregate, read by WorkingMemoryPolicy."""
+
+CONVERSATIONS_PREFIX = "/memory/conversations/"
+"""Past-conversation summaries. Produced by ConversationSummaryAggregate, read by EpisodicMemoryPolicy."""
+
+LOG_PREFIX = "/log/"
+"""Stream event logs and dropped-events snapshots (from compaction)."""
+
+
 ChangeCallback = Callable[[str], Awaitable[None]]
 
 
@@ -1083,7 +1096,7 @@ class EventLogWriter:
 
     async def persist(self, stream_id: StreamId, events: Iterable[BaseEvent]) -> None:
         """Write final events to /log/{stream_id}.jsonl."""
-        path = f"/log/{stream_id}.jsonl"
+        path = f"{LOG_PREFIX}{stream_id}.jsonl"
         lines = self._serialize_events(events)
         await self._store.write(path, "\n".join(lines))
 
@@ -1093,10 +1106,10 @@ class EventLogWriter:
         Discovers existing segments in the store to avoid overwriting.
         """
         prefix = f"{stream_id}.dropped-"
-        entries = await self._store.list("/log/")
+        entries = await self._store.list(LOG_PREFIX)
         existing = [e for e in entries if e.startswith(prefix) and e.endswith(".jsonl")]
         n = len(existing) + 1
-        path = f"/log/{stream_id}.dropped-{n}.jsonl"
+        path = f"{LOG_PREFIX}{stream_id}.dropped-{n}.jsonl"
         lines = self._serialize_events(events)
         await self._store.write(path, "\n".join(lines))
 
@@ -1109,18 +1122,18 @@ class EventLogWriter:
         all_events: list[BaseEvent] = []
 
         # Read dropped segments in order
-        entries = await self._store.list("/log/")
+        entries = await self._store.list(LOG_PREFIX)
         prefix = f"{stream_id}.dropped-"
         segments = sorted(
             [e for e in entries if e.startswith(prefix) and e.endswith(".jsonl")],
             key=lambda e: int(e[len(prefix) : -len(".jsonl")]),
         )
         for segment in segments:
-            events = await self._load_file(f"/log/{segment}")
+            events = await self._load_file(f"{LOG_PREFIX}{segment}")
             all_events.extend(events)
 
         # Read final log
-        final = await self._load_file(f"/log/{stream_id}.jsonl")
+        final = await self._load_file(f"{LOG_PREFIX}{stream_id}.jsonl")
         all_events.extend(final)
 
         return all_events
@@ -1200,7 +1213,7 @@ class DefaultBootstrap:
         )
 
         await store.write(
-            "/log/SKILL.md",
+            f"{LOG_PREFIX}SKILL.md",
             "Conversation logs. Each file is a JSONL record of one conversation's events. "
             "Auto-populated by the framework after each conversation.",
         )
