@@ -69,14 +69,13 @@ from .tools import ToolResult, Toolkit, tool
 from .watch import (
     AllOf,
     AnyOf,
-    BatchWatch,
+    CadenceWatch,
     CronWatch,
     DelayWatch,
     EventWatch,
     IntervalWatch,
     Sequence,
     Watch,
-    WindowWatch,
 )
 
 __all__ = (
@@ -94,8 +93,8 @@ __all__ = (
     "AudioInput",
     "BaseEvent",
     "BaseObserver",
-    "BatchWatch",
     "BinaryInput",
+    "CadenceWatch",
     "ChangeCallback",
     "ChangeSubscription",
     "CompactStrategy",
@@ -151,7 +150,6 @@ __all__ = (
     "Variable",
     "VideoInput",
     "Watch",
-    "WindowWatch",
     "WorkingMemoryAggregate",
     "WorkingMemoryPolicy",
     "observer",
