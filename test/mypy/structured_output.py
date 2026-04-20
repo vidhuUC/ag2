@@ -6,12 +6,27 @@ from dataclasses import dataclass
 
 from typing_extensions import assert_type
 
-from autogen.beta import Agent, PromptedSchema, ResponseSchema, response_schema
+from autogen.beta import Actor, PromptedSchema, ResponseSchema, response_schema
 from autogen.beta.testing import TestConfig
 
 
+class CheckResponseSchema:
+    def check_none(self) -> None:
+        rs = ResponseSchema.ensure_schema(None)
+        assert_type(rs, None)
+
+    def check_primitive(self) -> None:
+        rs = ResponseSchema.ensure_schema(str)
+        assert_type(rs, ResponseSchema[str])
+
+    def check_schema(self) -> None:
+        rs1 = ResponseSchema.ensure_schema(str)
+        rs2 = ResponseSchema.ensure_schema(rs1)
+        assert_type(rs2, ResponseSchema[str])
+
+
 async def check_default_response_schema() -> None:
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
     )
@@ -23,7 +38,7 @@ async def check_default_response_schema() -> None:
 
 
 async def check_int_response_schema() -> None:
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=int,
@@ -41,7 +56,7 @@ async def check_dataclass_response_schema() -> None:
         a: int
         b: str
 
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=Response,
@@ -53,7 +68,7 @@ async def check_dataclass_response_schema() -> None:
 
 
 async def check_union_response_schema() -> None:
-    agent = Agent[int | str](
+    agent = Actor[int | str](
         "test",
         config=TestConfig(),
         response_schema=int | str,
@@ -66,7 +81,7 @@ async def check_union_response_schema() -> None:
 
 
 async def check_response_schema_object() -> None:
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=ResponseSchema(int, name="Response"),
@@ -82,7 +97,7 @@ async def check_sync_callable_response() -> None:
     def func(content: str) -> int:
         return int(content)
 
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=func,
@@ -98,7 +113,7 @@ async def check_async_callable_response() -> None:
     async def func(content: str) -> int:
         return int(content)
 
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=func,
@@ -110,7 +125,7 @@ async def check_async_callable_response() -> None:
 
 
 async def check_conversation_save_type() -> None:
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=int,
@@ -126,7 +141,7 @@ async def check_conversation_save_type() -> None:
 
 
 async def check_ask_overrides_response_type() -> None:
-    agent = Agent("test", config=TestConfig())
+    agent = Actor("test", config=TestConfig())
 
     reply = await agent.ask("Hi, agent!")
     assert_type(reply.body, str | None)
@@ -138,7 +153,7 @@ async def check_ask_overrides_response_type() -> None:
 
 
 async def check_ask_none_drops_response_type() -> None:
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=int,
@@ -150,7 +165,7 @@ async def check_ask_none_drops_response_type() -> None:
 
 
 async def check_ask_response_type_not_affect_next_turn() -> None:
-    agent = Agent("test", config=TestConfig(), response_schema=float)
+    agent = Actor("test", config=TestConfig(), response_schema=float)
 
     reply = await agent.ask("Hi, agent!")
     assert_type(reply.body, str | None)
@@ -166,7 +181,7 @@ async def check_ask_response_type_not_affect_next_turn() -> None:
 
 
 async def check_prompted_schema_with_type() -> None:
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=PromptedSchema(int),
@@ -183,7 +198,7 @@ async def check_prompted_schema_with_dataclass() -> None:
         a: int
         b: str
 
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=PromptedSchema(Response),
@@ -197,7 +212,7 @@ async def check_prompted_schema_with_dataclass() -> None:
 async def check_prompted_schema_with_response_schema() -> None:
     schema = ResponseSchema(int, name="Response")
 
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=PromptedSchema(schema),
@@ -213,7 +228,7 @@ async def check_prompted_schema_with_callable() -> None:
     def func(content: str) -> int:
         return int(content)
 
-    agent = Agent(
+    agent = Actor(
         "test",
         config=TestConfig(),
         response_schema=PromptedSchema(func),
@@ -225,7 +240,7 @@ async def check_prompted_schema_with_callable() -> None:
 
 
 async def check_prompted_schema_ask_override() -> None:
-    agent = Agent("test", config=TestConfig())
+    agent = Actor("test", config=TestConfig())
 
     reply = await agent.ask("Hi, agent!", response_schema=PromptedSchema(int))
     assert_type(reply.body, str | None)
