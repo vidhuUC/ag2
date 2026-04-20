@@ -63,8 +63,9 @@ from .policies import (
     WorkingMemoryPolicy,
 )
 from .response import PromptedSchema, ResponseSchema, response_schema
+from .spec import AgentSpec
 from .stream import MemoryStream
-from .tools import ToolResult, tool
+from .tools import ToolResult, Toolkit, tool
 from .watch import (
     AllOf,
     AnyOf,
@@ -81,6 +82,7 @@ from .watch import (
 __all__ = (
     "Agent",
     "AgentReply",
+    "AgentSpec",
     "AggregateStrategy",
     "AggregateTrigger",
     "AggregationCompleted",
@@ -144,6 +146,7 @@ __all__ = (
     "TokenBudgetPolicy",
     "TokenMonitor",
     "ToolResult",
+    "Toolkit",
     "UnknownEvent",
     "Variable",
     "VideoInput",
